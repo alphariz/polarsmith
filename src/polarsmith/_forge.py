@@ -66,6 +66,8 @@ def forge(
     # --- 1. Validasi dan normalisasi input ---
     df = _ensure_polars(df)
     config = config or {}
+    from polarsmith._config import validate_and_normalize_config
+    config = validate_and_normalize_config(config)
     _validate_args(strategy, target, target_encoding)
 
     # --- 2. Apply strategy override ---
