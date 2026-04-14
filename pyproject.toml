@@ -1,0 +1,54 @@
+[project]
+name = "polarsmith"
+version = "0.1.0"
+description = "Automated feature engineering in one function, 100% Polars-native"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "alphariz", email = "rizymuhammad@gmail.com" }]
+requires-python = ">=3.10"
+keywords = ["feature-engineering", "polars", "machine-learning"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = ["polars>=1.0"]
+
+[project.optional-dependencies]
+sklearn = ["scikit-learn>=1.3"]
+dev = [
+    "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.15.10",
+    "mypy>=1.15.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/alphariz/polarsmith"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/polarsmith"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "N", "S", "B", "A", "C4", "T20", "RET", "SIM", "ARG", "ERA", "PL", "PERF", "RUF"]
+ignore = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "--cov=polarsmith --cov-report=term-missing --cov-fail-under=20 -v"
+
+[tool.coverage.run]
+source = ["src/polarsmith"]
+
+[tool.coverage.report]
+fail_under = 20
+show_missing = true
