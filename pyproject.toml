@@ -46,7 +46,7 @@ ignore = []
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "--cov=polarsmith --cov-report=term-missing --cov-fail-under=20 -v"
+addopts = "--cov=polarsmith --cov-report=term-missing --cov-fail-under=70 -v"
 
 [tool.coverage.run]
 source = ["src/polarsmith"]
