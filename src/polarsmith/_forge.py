@@ -18,6 +18,7 @@ def forge(
     cyclical: bool = False,
     interactions: bool = False,
     target_encoding: bool = False,
+    return_pandas: bool = False,   
     config: dict | None = None,
 ) -> pl.DataFrame:
     """
@@ -43,6 +44,9 @@ def forge(
     target_encoding : bool
         Aktifkan target encoding untuk kolom kategorik.
         Membutuhkan parameter `target`.
+    return_pandas : bool
+        Jika True, output akan dikonversi ke pandas DataFrame.
+        Default False — output tetap Polars.
     config : dict, optional
         Konfigurasi granular per fitur. Contoh:
         {
@@ -53,7 +57,7 @@ def forge(
 
     Returns
     -------
-    pl.DataFrame
+    pl.DataFrame | pd.DataFrame
         DataFrame dengan fitur tambahan. Kolom asli tetap ada.
 
     Examples
@@ -100,6 +104,10 @@ def forge(
         else:
             from polarsmith._encoding import add_target_encoding
             df = add_target_encoding(df, target, config.get("encoding", {}))
+
+    # --- 4. Konversi output jika diminta ---
+    if return_pandas:
+        return df.to_pandas()
 
     return df
 

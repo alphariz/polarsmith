@@ -39,11 +39,36 @@ def test_forge_target_encoding_without_target_warns(df_with_target):
         assert "target" in str(w[0].message).lower()
 
 
-def test_forge_accepts_pandas_dataframe(df_numeric):
-    """Pastikan pandas DataFrame dikonversi tanpa error."""
-    pandas_df = df_numeric.to_pandas()
-    result = forge(pandas_df)
+# --- pandas compatibility tests ---
+
+def test_forge_pandas_input_returns_polars_by_default(df_numeric):
+    """Default behavior: input pandas → output tetap Polars."""
+    pd_df = df_numeric.to_pandas()
+    result = forge(pd_df)
     assert isinstance(result, pl.DataFrame)
+
+
+def test_forge_pandas_input_return_pandas_flag(df_numeric):
+    """return_pandas=True → output pandas."""
+    pd_df = df_numeric.to_pandas()
+    import pandas as pd
+    result = forge(pd_df, return_pandas=True)
+    assert isinstance(result, pd.DataFrame)
+
+
+def test_forge_polars_input_return_pandas_flag(df_numeric):
+    """Polars input + return_pandas=True → output pandas."""
+    import pandas as pd
+    result = forge(df_numeric, return_pandas=True)
+    assert isinstance(result, pd.DataFrame)
+
+
+def test_forge_pandas_roundtrip_preserves_shape(df_numeric):
+    """Pandas → forge → pandas shape harus konsisten."""
+    pd_df = df_numeric.to_pandas()
+    result = forge(pd_df, auto_bin=True, return_pandas=True)
+    assert result.shape[0] == pd_df.shape[0]
+    assert result.shape[1] >= pd_df.shape[1]
 
 
 def test_forge_invalid_input_type_raises():
