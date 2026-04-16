@@ -41,3 +41,15 @@ df_out = forge(
 | WoE Encoding       | ✅ v0.1 |
 | Smart Detection    | ✅ v0.1 |
 | Pandas Compat      | ✅ v0.1 |
+
+## Performance
+
+Benchmark pada MacBook Air M-series, Python 3.12:
+
+| Dataset Size | Polarsmith | Pandas equivalent | Speedup |
+|-------------|-----------|------------------|---------|
+| 10,000 rows | 0.0xs     | 0.0xs            | Xx      |
+| 100,000 rows| 0.0xs     | 0.0xs            | Xx      |
+| 1,000,000 rows| 0.0xs   | 0.0xs            | Xx      |
+
+*Polarsmith menggunakan Polars 1.x dengan lazy evaluation dan SIMD.*
