@@ -1,6 +1,6 @@
 [project]
 name = "polarsmith"
-version = "0.1.0"
+version = "1.0.0"
 description = "Automated feature engineering in one function, 100% Polars-native"
 readme = "README.md"
 license = { text = "MIT" }
@@ -8,9 +8,15 @@ authors = [{ name = "alphariz", email = "rizymuhammad@gmail.com" }]
 requires-python = ">=3.10"
 keywords = ["feature-engineering", "polars", "machine-learning"]
 classifiers = [
+    "Development Status :: 5 - Production/Stable",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: MIT License",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
 ]
 dependencies = ["polars>=1.0"]
 
@@ -40,7 +46,9 @@ line-length = 88
 target-version = "py310"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "N", "S", "B", "A", "C4", "T20", "RET", "SIM", "ARG", "ERA", "PL", "PERF", "RUF"]
+select = [
+    "E", "F", "I", "UP", "N", "S", "B", "A", "C4", "T20", "RET", "SIM", "ARG", "ERA", "PL", "PERF", "RUF"
+]
 ignore = []
 
 [tool.pytest.ini_options]
@@ -52,5 +60,5 @@ addopts = "--cov=polarsmith --cov-report=term-missing --cov-fail-under=70 -v"
 source = ["src/polarsmith"]
 
 [tool.coverage.report]
-fail_under = 20
+fail_under = 70
 show_missing = true
