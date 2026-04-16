@@ -35,8 +35,9 @@ def test_forge_target_encoding_without_target_warns(df_with_target):
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
         forge(df_with_target, target_encoding=True)
-        assert len(w) == 1
-        assert "target" in str(w[0].message).lower()
+        # Bisa >= 1 warning (smart detector juga memberi warning jika target None)
+        assert len(w) >= 1
+        assert any("target" in str(wm.message).lower() for wm in w)
 
 
 def test_forge_with_target_encoding(df_with_target):
@@ -45,6 +46,13 @@ def test_forge_with_target_encoding(df_with_target):
         df_with_target, target="churn", target_encoding=True
     )
     assert "category_enc_james_stein" in result.columns
+
+
+def test_forge_strategy_smart_auto_detects(df_with_datetime):
+    """Default strategy='smart' harus otomatis deteksi cyclical columns."""
+    # Tanpa eksplisit set cyclical=True, harus tetap terdeteksi
+    result = forge(df_with_datetime)
+    assert "timestamp_hour_sin" in result.columns
 
 
 # --- pandas compatibility tests ---

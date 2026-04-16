@@ -79,6 +79,14 @@ def forge(
         auto_bin = cyclical = interactions = target_encoding = True
     elif strategy == "minimal":
         auto_bin = cyclical = interactions = target_encoding = False
+    elif strategy == "smart":
+        from polarsmith._detector import detect_smart_flags
+        smart = detect_smart_flags(df, target)
+        # Hanya override jika user tidak set eksplisit (masih default False)
+        auto_bin       = auto_bin       or smart["auto_bin"]
+        cyclical       = cyclical       or smart["cyclical"]
+        interactions   = interactions   or smart["interactions"]
+        target_encoding = target_encoding or smart["target_encoding"]
 
     # --- 3. Dispatch ke modul (import lazy untuk performa) ---
     if auto_bin:
