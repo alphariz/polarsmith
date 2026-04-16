@@ -60,12 +60,16 @@ def forge(
     pl.DataFrame | pd.DataFrame
         DataFrame dengan fitur tambahan. Kolom asli tetap ada.
 
-    Examples
-    --------
     >>> import polars as pl
     >>> from polarsmith import forge
-    >>> df = pl.read_parquet("data/train.parquet")
-    >>> df_out = forge(df, target="churn", auto_bin=True, cyclical=True)
+    >>> df = pl.DataFrame({
+    ...     "age": [25, 30, 35],
+    ...     "score": [80, 90, 85],
+    ...     "churn": [0, 1, 0]
+    ... })
+    >>> df_out = forge(df, target="churn", auto_bin=True)
+    >>> "age_bin" in df_out.columns
+    True
     """
     # --- 1. Validasi dan normalisasi input ---
     df = _ensure_polars(df)
