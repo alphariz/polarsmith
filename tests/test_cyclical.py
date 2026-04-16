@@ -96,3 +96,32 @@ def test_cyclical_multiple_components(df_with_datetime):
     for comp in ["hour", "dayofweek", "month"]:
         assert f"timestamp_{comp}_sin" in result.columns
         assert f"timestamp_{comp}_cos" in result.columns
+
+
+def test_cyclical_handles_date_dtype():
+    """Kolom Date (bukan Datetime) juga harus terdeteksi dan diproses."""
+    df = pl.DataFrame({
+        "date_col": pl.Series(["2023-01-15", "2023-06-20"]).str.to_date(),
+    })
+    result = add_cyclical_features(df, ["month"])
+    assert "date_col_month_sin" in result.columns
+
+
+def test_cyclical_unknown_component_in_list_skipped():
+    """
+    Komponen yang tidak ada di _DATETIME_COMPONENTS di-skip,
+    bukan raise error (validasi ada di level config).
+    Untuk hit line 64, kita mock _resolve_components untuk bypass validation.
+    """
+    from unittest.mock import patch
+    df_dt = pl.DataFrame({
+        "ts": pl.Series(["2023-01-01 10:00:00"]).str.to_datetime(),
+    })
+    
+    # Mocking _resolve_components untuk return ["unknown"] yang biasanya dilarang
+    with patch("polarsmith._cyclical._resolve_components", return_value=["unknown"]):
+        # Line 64: if component not in _DATETIME_COMPONENTS: continue
+        # Line 78: if not new_expressions: return df
+        result = add_cyclical_features(df_dt, ["not-actually-used-because-mocked"])
+        assert result.equals(df_dt)
+        assert "ts_unknown_sin" not in result.columns

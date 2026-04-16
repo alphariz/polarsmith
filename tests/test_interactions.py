@@ -1,5 +1,6 @@
 import polars as pl
 import pytest
+import warnings
 from polarsmith._interactions import (
     add_interactions,
     _parse_config,
@@ -92,3 +93,25 @@ def test_interactions_no_ratio_flag(df_numeric):
     result = add_interactions(df_numeric, {"pairs": ["age*income"], "add_ratio": False})
     assert "age_div_income" not in result.columns
     assert "age_x_income" in result.columns
+
+
+def test_interactions_skips_ratio_for_zero_column():
+    """Kolom yang semua nilainya 0 tidak boleh jadi denominator ratio."""
+    df = pl.DataFrame({
+        "a": [1.0, 2.0, 3.0],
+        "b": [0.0, 0.0, 0.0],   # semua nol
+    })
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        result = add_interactions(df, ["a*b"])
+        # ratio a/b harus di-skip
+        assert "a_div_b" not in result.columns
+        assert len(w) >= 1
+
+
+def test_interactions_empty_pairs_returns_unchanged():
+    """Jika _resolve_pairs return empty, hit line 51."""
+    df = pl.DataFrame({"a": [1.0, 2.0, 3.0], "b": [4.0, 5.0, 6.0]})
+    # "pairs"=[] akan diconsider sebagai explicit empty
+    result = add_interactions(df, {"pairs": []})
+    assert result.equals(df)

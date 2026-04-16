@@ -101,3 +101,44 @@ def test_bin_features_no_numeric_cols_returns_unchanged():
     df = pl.DataFrame({"name": ["Alice", "Bob"], "city": ["Jakarta", "Bandung"]})
     result = bin_features(df, {})
     assert result.equals(df)
+
+
+def test_bin_series_handles_all_nan_gracefully():
+    """Jika series semua null, harus return null series tanpa crash."""
+    s = pl.Series("broken", [None, None, None], dtype=pl.Float64)
+    result = _bin_series(s, max_bins=5, method="equal_width")
+    assert result.name == "broken_bin"
+    # Boleh null semua, yang penting tidak raise exception
+    assert len(result) == 3
+
+
+def test_bin_series_handles_mostly_null_gracefully():
+    """Jika series hampir semua null (unique > 1 tapi min/max mungkin bermasalah), hit baris 101."""
+    s = pl.Series("broken", [1.0, None], dtype=pl.Float64)
+    result = _bin_series(s, max_bins=5, method="equal_width")
+    assert result.name == "broken_bin"
+    assert (result == "same_value").all()
+
+
+def test_bin_series_exception_fallback():
+    """Trigger Exception di _bin_series untuk hit fallback line 123."""
+    import warnings
+    # pl.Series([float('inf'), 1.0]) might fail in cut/qcut calculations in some versions
+    # or we can mock pl.Series.cut
+    s = pl.Series("inf", [0.0, 1.0])
+    
+    # Mocking locally to trigger the except block
+    original_cut = pl.Series.cut
+    try:
+        def mock_cut(*args, **kwargs):
+            raise ValueError("Kebutuhan coverage")
+        pl.Series.cut = mock_cut
+        
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            result = _bin_series(s, max_bins=2, method="equal_width")
+            assert len(w) >= 1
+            assert "binning gagal" in str(w[0].message).lower()
+            assert result.null_count() == 2
+    finally:
+        pl.Series.cut = original_cut

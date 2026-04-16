@@ -55,3 +55,40 @@ def test_encoding_valid_method():
 def test_encoding_invalid_method_raises():
     with pytest.raises(ValueError, match="harus salah satu dari"):
         validate_and_normalize_config({"encoding": {"method": "mean"}})
+
+
+def test_binning_config_not_dict_raises():
+    with pytest.raises(ValueError, match="harus berupa dict"):
+        validate_and_normalize_config({"binning": "quantile"})
+
+
+def test_cyclical_config_not_list_raises():
+    with pytest.raises(ValueError, match="harus list"):
+        validate_and_normalize_config({"cyclical": "hour"})
+
+
+def test_cyclical_config_none_passes():
+    result = validate_and_normalize_config({"cyclical": None})
+    assert result["cyclical"] is None
+
+
+def test_interactions_config_bad_type_raises():
+    with pytest.raises(ValueError, match="harus list atau dict"):
+        validate_and_normalize_config({"interactions": 42})
+
+
+def test_interactions_max_pairs_zero_raises():
+    with pytest.raises(ValueError, match="max_pairs"):
+        validate_and_normalize_config({"interactions": {"max_pairs": 0}})
+
+
+def test_encoding_config_not_dict_raises():
+    with pytest.raises(ValueError, match="harus dict"):
+        validate_and_normalize_config({"encoding": "woe"})
+
+
+def test_interactions_valid_dict_config():
+    cfg = {"interactions": {"max_pairs": 5, "add_ratio": False}}
+    result = validate_and_normalize_config(cfg)
+    assert result["interactions"]["max_pairs"] == 5
+    assert result["interactions"]["add_ratio"] is False

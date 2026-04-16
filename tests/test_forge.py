@@ -39,6 +39,14 @@ def test_forge_target_encoding_without_target_warns(df_with_target):
         assert "target" in str(w[0].message).lower()
 
 
+def test_forge_with_target_encoding(df_with_target):
+    """Hit lines 105-106 di _forge.py by providing target."""
+    result = forge(
+        df_with_target, target="churn", target_encoding=True
+    )
+    assert "category_enc_james_stein" in result.columns
+
+
 # --- pandas compatibility tests ---
 
 def test_forge_pandas_input_returns_polars_by_default(df_numeric):

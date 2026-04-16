@@ -1,4 +1,5 @@
 import math
+import warnings
 import polars as pl
 import pytest
 from polarsmith._encoding import (
@@ -170,3 +171,27 @@ def test_add_target_encoding_preserves_original_cols(df_with_target):
     result = add_target_encoding(df_with_target, "churn", {})
     for col in df_with_target.columns:
         assert col in result.columns
+
+
+def test_add_target_encoding_no_cat_cols_warns(df_numeric):
+    """DataFrame tanpa kolom kategorik harus warning, bukan error."""
+    # df_numeric hanya punya kolom numerik
+    df_with_fake_target = df_numeric.with_columns(
+        pl.lit(0).alias("target")
+    )
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        result = add_target_encoding(df_with_fake_target, "target", {})
+        assert len(w) == 1
+        assert "kategorik" in str(w[0].message).lower()
+    assert result.equals(df_with_fake_target)
+
+
+def test_add_target_encoding_with_specific_cols(df_with_target):
+    """Hit line 284 di _encoding.py dengan memberikan target_cols_cfg."""
+    result = add_target_encoding(
+        df_with_target, "churn", {"columns": ["category"]}
+    )
+    assert "category_enc_james_stein" in result.columns
+    # region_enc_james_stein tidak boleh ada karena tidak ada di columns
+    assert "region_enc_james_stein" not in result.columns
